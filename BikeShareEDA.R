@@ -1,6 +1,5 @@
 library(vroom)
 library(tidyverse)
-library(corrplot)
 library(gridExtra)
 
 # Reading in Data
@@ -38,4 +37,5 @@ bar_dis <- DataExplorer::plot_bar(train)
 hist_con <- DataExplorer::plot_histogram(train)
 
 grid.arrange(data_info, corr_con, bar_dis[[1]], hist_con[[1]], ncol=2)
+
 
