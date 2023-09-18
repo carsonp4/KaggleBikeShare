@@ -1,6 +1,7 @@
 # Loading Packages
 library(tidyverse)
 library(tidymodels)
+library(janitor)
 library(vroom)
 
 # Reading in Data
@@ -50,9 +51,10 @@ my_recipe <- recipe(count ~ ., data = train) %>%
 
 # Using recipe to make dataset
 prepped_recipe <- prep(my_recipe)
-wrangled <- bake(prepped_recipe, new_data = train)
+bake(prepped_recipe, new_data = train)
+bake(prepped_recipe, new_data = test)
 
-# Makign linear regression model
+# Making linear regression model
 my_mod <- linear_reg() %>% #Type of model
   set_engine("lm") # Engine = What R function to use
 
@@ -62,12 +64,16 @@ bike_workflow <- workflow() %>%
   add_model(my_mod) %>%
   fit(data = train) # Fit the workflow
 
+extract_fit_engine(bike_workflow) %>%
+  summary()
+
 # Predicting test data
 bike_predictions <- predict(bike_workflow,
                             new_data=test) # Use fit to predict
 
 # Changing all negative values to 1 (never 0 in train)
 bike_predictions[bike_predictions < 0] <- 1
+
 
 # Making submit file with correct column names
 submit <- cbind(test$datetime, bike_predictions)
@@ -76,3 +82,11 @@ submit$datetime <- as.character(submit$datetime)
 
 # Exporting submit file
 write_csv(submit, "submit.csv")
+
+
+# Vis's
+hist(submit$count)
+
+ggplot(submit, aes(x = as.Date(datetime), y = count)) +
+  geom_line() +  # Add a line plot
+  labs(x = "Date", y = "Value", title = "Date vs. Value Plot")
